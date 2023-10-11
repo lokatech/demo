@@ -1,8 +1,11 @@
+#!/bin/bash
+
 # Define variables
 clusterName="<cluster-name>"
 awsAccountId="<aws-account-id>"
 region="<your-region>"
 lambdaHandlerFile="aws-lambda/exception_handler.py"  # Python handler file
+lambdaExecutionRoleArn="<your-lambda-execution-role-arn>"  # Add your Lambda execution role ARN here
 
 # Define your log group and log stream with wildcards in log-stream-name
 logGroupArn="arn:aws:logs:$region:$awsAccountId:log-group:/aws/containerinsights/$clusterName/application:*"
@@ -13,7 +16,7 @@ aws lambda create-function \
   --function-name ExceptionHandler \
   --runtime python3.8 \
   --handler aws-lambda/exception_handler.lambda_handler \
-  --role YourLambdaExecutionRoleArn \
+  --role "lambdaExecutionRoleArn" \
   --code file://$lambdaHandlerFile \
   --region $region
 
@@ -57,8 +60,8 @@ for exception in $exception_config; do
 
     aws logs put-metric-filter \
       --log-group-name "$logGroupArn" \
-      --filter-name $filterName \
+      --filter-name "$filterName" \
       --filter-pattern "$filterPattern" \
-      --metric-transformations '[{ "metricName": "$metricName", "metricValue": "1" }]' \
-      --region $region
+      --metric-transformations '[{ "metricName": "'"$metricName"'", "metricValue": "1" }]' \
+      --region "$region"
 done
