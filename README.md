@@ -1,4 +1,4 @@
-## Demo For Creating Lambda Functions as Exception Handlers for a Java Spring Web App
+## Demo For Creating Lambda Functions as Exception Handlers for a Java Spring Web App Using Cloudwatch Application Logs 
 
 **Prerequisites:**
 1. An EKS cluster.
