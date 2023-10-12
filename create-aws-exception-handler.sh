@@ -32,22 +32,22 @@ aws lambda create-event-source-mapping \
 exception_config='[
     {
         "filterName": "JavaNullPointerExceptionFilter",
-        "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"*java.lang.NullPointerException*\") }",
+        "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"*threw exception*java.lang.NullPointerException*\") }",
         "metricName": "NullPointerExceptionCount"
     },
     {
         "filterName": "JavaArithmeticExceptionFilter",
-        "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"*java.lang.ArithmeticException*\") }",
+        "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"*threw exception*java.lang.ArithmeticException*\") }",
         "metricName": "ArithmeticExceptionCount"
     },
     {
         "filterName": "JavaArrayIndexOutOfBoundsExceptionFilter",
-        "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"*java.lang.ArrayIndexOutOfBoundsException*\") }",
+        "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"**threw exception*java.lang.ArrayIndexOutOfBoundsException*\") }",
         "metricName": "ArrayIndexOutOfBoundsExceptionCount"
     },
     {
         "filterName": "JavaNumberFormatExceptionFilter",
-        "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"*java.lang.NumberFormatException*\") }",
+        "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"*threw exception*java.lang.NumberFormatException*\") }",
         "metricName": "NumberFormatExceptionCount"
     }
 ]'
