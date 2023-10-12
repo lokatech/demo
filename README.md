@@ -7,54 +7,55 @@
 4. Some kind of EKS application logs set up (I followed this tutorial: [CloudWatch Stream Container Logs in EKS](https://repost.aws/knowledge-center/cloudwatch-stream-container-logs-eks)).
 
 ## Steps
-1. Fill in your own host name and other values into `demo-k8s.yaml`, 
-2. Fill in your own aws-account-id and region values into install.sh
-3. Create a lambda execution role. The LambdaExecutionRoleArn is required to specify the AWS Identity and Access Management (IAM) role that grants necessary permissions for your AWS Lambda function to interact with AWS services and resources. You can set it up by creating an IAM role with the required policies and attaching it to your Lambda function during its creation or update.
-   To create a Lambda execution role and define its permissions in AWS IAM, follow these steps:
+1. Fill in your own host name and other values into `demo-k8s.yaml`.
+2. Fill in your own AWS account ID, region, and Lambda execution role ARN values into `install.sh`.
+   3. Create a Lambda execution role with the necessary permissions. This IAM role grants permissions for your AWS Lambda function to interact with AWS services and resources, including CloudWatch Logs. Follow these steps to create the role:
 
-    Open the AWS IAM Console: Log in to your AWS Management Console and navigate to the Identity and Access Management (IAM) console.
-    
-    Create a New Role:
-    
-    In the left navigation pane, select "Roles."
-    Click the "Create role" button.
-    Select Your Use Case:
-    
-    In the "Select type of trusted entity" section, select "AWS service."
-    In the "Choose the use case" section, search for and select "Lambda."
-    Add Permissions:
-    
-    In the "Permissions" section, you'll be prompted to attach policies to the role. Attach policies based on the specific permissions your Lambda function needs. For your use case, you will need at least the following permissions:
-    
-    AWSLambdaBasicExecutionRole: Provides the basic permissions required to execute a Lambda function.
-    AWSLogsCreateLogGroup: Allows creating log groups.
-    AWSLogsCreateLogStream: Allows creating log streams.
-    AWSLogsPutLogEvents: Allows putting log events into log streams.
-    AWSLambdaRole: Grants permissions required for Lambda to write logs to CloudWatch Logs.
-    You can use the "Create policy" button to create custom policies with the required permissions if they don't already exist.
-    
-    Add Tags (Optional):
-    
-    You can add tags for easier identification if desired.
-    Review and Create:
-    
-    Give your role a name and optionally a description.
-    Review the role configuration to ensure it has the necessary permissions.
-    Create Role:
-    
-    Click the "Create role" button to create the role.
-    Copy the Role ARN:
-    
-    After creating the role, you will see a summary page for the role. Copy the Role ARN from this page.
-    Update Your Script:
-    
-    Replace <your-lambda-execution-role-arn> in your script with the actual Role ARN you copied in the previous step.
-    Now, your Lambda function will have the necessary permissions to interact with CloudWatch Logs and other AWS resources as defined by the policies attached to the role.
+       1. Open the AWS IAM Console: Log in to your AWS Management Console and navigate to the Identity and Access Management (IAM) console.
+       2. Create a New Role:
+           - In the left navigation pane, select "Roles."
+           - Click the "Create role" button.
+       3. Select Your Use Case:
+           - In the "Select type of trusted entity" section, select "AWS service."
+           - In the "Choose the use case" section, search for and select "Lambda."
+       4. Add Permissions:
+           - In the "Permissions" section, attach policies to the role based on the specific permissions your Lambda function needs. For your use case, you will need at least the following permissions:
+             - In the "Permissions" section, attach policies to the role based on the specific permissions your Lambda function needs. For your use case, you can create custom policies with the required permissions. Here is an example policy JSON with the necessary permissions for Lambda and CloudWatch Logs:
 
-4. Fill in your lambda execution role arn, clusterName, awsAccountId, and region into the top of create-aws-exception-handler.sh
-5. run install.sh.
-6. run create-aws-exception-handler.sh In this script, you are automating the setup of an AWS Lambda function designed to handle exception log events from a Java Spring web application running on an Amazon Elastic Kubernetes Service (EKS) cluster. You start by defining essential variables, including the cluster name, AWS account ID, region, and the AWS Lambda execution role ARN. The script then creates the Lambda function, setting its runtime, handler, and IAM role. It also creates an Event Source Mapping to enable the Lambda function to consume log events. Furthermore, the script defines exception filter patterns and metric names in a JSON configuration file, which are used to create metric filters for different types of exceptions. This automation simplifies the deployment and configuration process, enhancing your application's error handling and monitoring capabilities in an AWS environment.
-
+           ```json
+           {
+             "Version": "2012-10-17",
+             "Statement": [
+               {
+                 "Effect": "Allow",
+                 "Action": [
+                   "lambda:CreateFunction",
+                   "lambda:CreateEventSourceMapping",
+                   "logs:PutMetricFilter",
+                   "logs:CreateLogGroup",
+                   "logs:CreateLogStream",
+                   "logs:PutLogEvents",
+                   "logs:DescribeLogGroups"
+                 ],
+                 "Resource": "*"
+               }
+             ]
+           }
+           ```
+       5. Add Tags (Optional):
+           - You can add tags for easier identification if desired.
+       6. Review and Create:
+           - Give your role a name and optionally a description.
+           - Review the role configuration to ensure it has the necessary permissions.
+       7. Create Role:
+           - Click the "Create role" button to create the role.
+       8. Copy the Role ARN:
+           - After creating the role, you will see a summary page for the role. Copy the Role ARN from this page.
+       9. Update Your Script:
+           - Replace `<your-lambda-execution-role-arn>` in your script with the actual Role ARN you copied in the previous step.
+4. Fill in your Lambda execution role ARN, clusterName, AWS account ID, and region into the top of `create-aws-exception-handler.sh`.
+5. Run `install.sh`.
+6. Run `create-aws-exception-handler.sh`.
 
 
 ## About
