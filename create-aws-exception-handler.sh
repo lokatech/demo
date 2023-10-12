@@ -15,17 +15,18 @@ logStreamName="*application.var.log.containers.demo*"
 aws lambda create-function \
   --function-name ExceptionHandler \
   --runtime python3.8 \
-  --handler aws-lambda/exception_handler.lambda_handler \
-  --role $lambdaExecutionRoleArn  \
-  --code file://$lambdaHandlerFile \
-  --region $region
+  --handler exception_handler.lambda_handler \
+  --role "$lambdaExecutionRoleArn" \
+  --zip-file "fileb://$lambdaHandlerFile" \
+  --region "$region"
 
-# Create an Event Source Mapping for the ExceptionHandler Lambda function
-aws lambda create-event-source-mapping \
-  --function-name ExceptionHandler \
-  --batch-size 1 \
-  --event-source /aws/logs/"$logGroupArn"/ExceptionFilter \
-  --region $region
+# Create a subscription filter to forward log events to the Lambda function
+aws logs put-subscription-filter \
+  --log-group-name "$logGroupArn" \
+  --filter-name "ExceptionFilter" \
+  --filter-pattern "" \
+  --destination-arn "$(aws lambda list-functions --query 'Functions[?FunctionName==`ExceptionHandler`].FunctionArn' --output text)" \
+  --role-arn "$lambdaExecutionRoleArn"
 
 # Define the exception filter patterns and metric names in a JSON file
 # This file can be used as input to create metric filters for different exceptions
