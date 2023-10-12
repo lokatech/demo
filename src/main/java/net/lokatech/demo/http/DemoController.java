@@ -73,7 +73,7 @@ class HomeController {
 
             // Check if the request count exceeds the rate limit
             if (requestCount > RATE_LIMIT) {
-                throw new RateLimitExceededException("Rate limit exceeded. Please try again later.");
+                throw new RuntimeException("Rate limit exceeded. Please try again later.");
             }
         }
     }
