@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Define variables
-clusterName="<cluster-name>"
-awsAccountId="<aws-account-id>"
-region="<your-region>"
+clusterName="Marketing"
+awsAccountId="704480082040"
+region="us-east-2"
 lambdaHandlerFile="aws-lambda/exception_handler.py"  # Python handler file
 lambdaExecutionRoleArn="<your-lambda-execution-role-arn>"  # Add your Lambda execution role ARN here
 
