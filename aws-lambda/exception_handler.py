@@ -1,68 +1,34 @@
-#!/bin/bash
+import json
+import logging
 
-# Define variables
-clusterName="Marketing"
-awsAccountId="704480082040"
-region="us-east-2"
-lambdaHandlerFile="aws-lambda/exception_handler.py"  # Python handler file
-lambdaExecutionRoleArn="arn:aws:iam::704480082040:role/LambdaExceptionHandlerRole"  # Add your Lambda execution role ARN here
+# Configure logging
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
-# Define your log group and log stream with wildcards in log-stream-name
-logGroupArn="arn:aws:logs:$region:$awsAccountId:log-group:/aws/containerinsights/$clusterName/application:*"
-logStreamName="*application.var.log.containers.demo*"
+def lambda_handler(event, context):
+    # Parse the event data
+    log_data = json.loads(event['awslogs']['data'])
 
-# Create a Lambda function for handling exception log events
-aws lambda create-function \
-  --function-name ExceptionHandler \
-  --runtime python3.8 \
-  --handler exception_handler.lambda_handler \
-  --role "$lambdaExecutionRoleArn" \
-  --zip-file "fileb://$lambdaHandlerFile" \
-  --region "$region"
+    # Iterate over log events
+    for log_event in log_data['logEvents']:
+        log_message = log_event['message']
 
-# Create a subscription filter to forward log events to the Lambda function
-aws logs put-subscription-filter \
-  --log-group-name "$logGroupArn" \
-  --filter-name "ExceptionFilter" \
-  --filter-pattern "" \
-  --destination-arn "$(aws lambda list-functions --query 'Functions[?FunctionName==`ExceptionHandler`].FunctionArn' --output text)" \
-  --role-arn "$lambdaExecutionRoleArn"
+        # Determine the exception type based on the log message
+        if "java.lang.NullPointerException" in log_message:
+            exception_type = "NullPointerException"
+        elif "java.lang.ArithmeticException" in log_message:
+            exception_type = "ArithmeticException"
+        elif "java.lang.ArrayIndexOutOfBoundsException" in log_message:
+            exception_type = "ArrayIndexOutOfBoundsException"
+        elif "java.lang.NumberFormatException" in log_message:
+            exception_type = "NumberFormatException"
+        else:
+            exception_type = "UnknownException"
 
-# Define the exception filter patterns and metric names in a JSON file
-# This file can be used as input to create metric filters for different exceptions
-exception_config='[
-    {
-        "filterName": "JavaNullPointerExceptionFilter",
-        "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"*threw exception*java.lang.NullPointerException*\") }",
-        "metricName": "NullPointerExceptionCount"
-    },
-    {
-        "filterName": "JavaArithmeticExceptionFilter",
-        "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"*threw exception*java.lang.ArithmeticException*\") }",
-        "metricName": "ArithmeticExceptionCount"
-    },
-    {
-        "filterName": "JavaArrayIndexOutOfBoundsExceptionFilter",
-        "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"**threw exception*java.lang.ArrayIndexOutOfBoundsException*\") }",
-        "metricName": "ArrayIndexOutOfBoundsExceptionCount"
-    },
-    {
-        "filterName": "JavaNumberFormatExceptionFilter",
-        "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"*threw exception*java.lang.NumberFormatException*\") }",
-        "metricName": "NumberFormatExceptionCount"
+        # Print the detected exception type
+        logger.info(f"Detected Exception: {exception_type}")
+
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Exception handler executed successfully!')
     }
-]'
-
-# Create metric filters for different exceptions based on the configuration
-for exception in $exception_config; do
-    filterName=$(echo $exception | jq -r '.filterName')
-    filterPattern=$(echo $exception | jq -r '.filterPattern')
-    metricName=$(echo $exception | jq -r '.metricName')
-
-    aws logs put-metric-filter \
-      --log-group-name "$logGroupArn" \
-      --filter-name "$filterName" \
-      --filter-pattern "$filterPattern" \
-      --metric-transformations '[{ "metricName": "'"$metricName"'", "metricValue": "1" }]' \
-      --region "$region"
-done

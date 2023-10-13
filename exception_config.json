@@ -1,0 +1,22 @@
+[
+  {
+    "filterName": "JavaNullPointerExceptionFilter",
+    "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"*threw exception*java.lang.NullPointerException*\") && ($.kubernetes.container_name = \"demo\") }",
+    "metricTransformations": [{ "metricName": "NullPointerExceptionCount", "metricValue": "1", "metricNamespace": "LokatechDemo" }]
+  },
+  {
+    "filterName": "JavaArithmeticExceptionFilter",
+    "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"*threw exception*java.lang.ArithmeticException*\") && ($.kubernetes.container_name = \"demo\") }",
+    "metricTransformations": [{ "metricName": "ArithmeticExceptionCount", "metricValue": "1", "metricNamespace": "LokatechDemo" }]
+  },
+  {
+    "filterName": "JavaArrayIndexOutOfBoundsExceptionFilter",
+    "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"**threw exception*java.lang.ArrayIndexOutOfBoundsException*\") && ($.kubernetes.container_name = \"demo\") }",
+    "metricTransformations": [{ "metricName": "ArrayIndexOutOfBoundsExceptionCount", "metricValue": "1", "metricNamespace": "LokatechDemo" }]
+  },
+  {
+    "filterName": "JavaNumberFormatExceptionFilter",
+    "filterPattern": "{ ($.log.level = \"ERROR\") && ($.log.message = \"*threw exception*java.lang.NumberFormatException*\") && ($.kubernetes.container_name = \"demo\") }",
+    "metricTransformations": [{ "metricName": "NumberFormatExceptionCount", "metricValue": "1", "metricNamespace": "LokatechDemo" }]
+  }
+]
